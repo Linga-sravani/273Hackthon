@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Researcher: Food Security and Large Language ChatGPT</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="center-container">
+        <h1 id="page-title">Researcher: Food Security and Large Language ChatGPT</h1>
+
+        <div id="chat-container">
+            <div id="chat-box"></div>
+            <div id="input-container">
+                <input type="text" id="user-input" placeholder="Type your message here..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input");
+            const message = userInput.value;
+            if (message.trim() === "") return;
+
+            displayMessage(message, "user-message");
+
+            userInput.value = "";
+
+            try {
+                const response = await fetch("http://localhost:8099/get-answer", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ "message": message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                const data = await response.json();
+                console.log(data.message.output_text);
+                displayMessage(data.message.output_text, "bot-message");
+            } catch (error) {
+                console.error("Error in fetching response:", error);
+                displayMessage("Sorry, an error occurred while fetching the response.", "bot-message");
+            }
+        }
+
+        function displayMessage(text, className) {
+            const chatBox = document.getElementById("chat-box");
+            const messageElement = document.createElement("div");
+            messageElement.className = "message " + className;
+            messageElement.innerText = text;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
